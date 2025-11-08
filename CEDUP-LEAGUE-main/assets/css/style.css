@@ -1,0 +1,13 @@
+/* Configuração de tema escuro/claro */
+:root {
+    --color-primary: #3b82f6;
+    --color-secondary: #10b981;
+    --color-danger: #ef4444;
+}
+
+/* Transições suaves para tema */
+* {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Estilos customizados adicionais virão aqui */

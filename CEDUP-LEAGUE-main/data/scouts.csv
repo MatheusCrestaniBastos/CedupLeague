@@ -1,0 +1,4 @@
+player_id,round_id,goals,assists,shots_on_target,saves,clean_sheet,own_goals,red_cards,fouls
+player_name,goals,assists,shots_on_target,saves,clean_sheet,own_goals,red_cards,fouls
+João Silva,2,1,5,0,0,0,0,2
+Pedro Santos,0,0,0,8,1,0,0,1

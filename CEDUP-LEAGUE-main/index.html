@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEDUP League - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-500 to-purple-600 min-h-screen flex items-center justify-center">
+    
+    <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">🏆 CEDUP League</h1>
+            <p class="text-gray-600">Fantasy Game do CEDUP</p>
+        </div>
+
+        <!-- Abas -->
+        <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
+            <button id="btn-login" onclick="mostrarLogin()" class="flex-1 py-2 rounded-md bg-white shadow-sm font-semibold text-blue-600 transition-all">
+                Login
+            </button>
+            <button id="btn-cadastro" onclick="mostrarCadastro()" class="flex-1 py-2 rounded-md font-semibold text-gray-600 transition-all">
+                Cadastro
+            </button>
+        </div>
+
+        <!-- Formulário de Login -->
+        <form id="form-login" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input type="email" id="login-email" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="seu@email.com">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                <input type="password" id="login-senha" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="••••••••">
+            </div>
+
+            <button type="submit" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors">
+                Entrar
+            </button>
+        </form>
+
+        <!-- Formulário de Cadastro -->
+        <form id="form-cadastro" class="space-y-4 hidden">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Time</label>
+                <input type="text" id="cadastro-time" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Meu Time FC">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                <input type="email" id="cadastro-email" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="seu@email.com">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                <input type="password" id="cadastro-senha" required
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="••••••••" minlength="6">
+            </div>
+
+            <button type="submit" 
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition-colors">
+                Criar Conta
+            </button>
+        </form>
+
+        <!-- Mensagens -->
+        <div id="mensagem-auth" class="mt-4 hidden"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/auth.js"></script>
+</body>
+</html>

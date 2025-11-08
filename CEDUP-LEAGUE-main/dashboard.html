@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEDUP League - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+    
+    <!-- Navegação -->
+    <nav class="bg-white dark:bg-gray-800 shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <!-- Logo e Links -->
+                <div class="flex items-center space-x-6">
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">🏆 CEDUP League</h1>
+                    <div class="flex space-x-4 text-sm font-medium">
+                        <a href="dashboard.html" class="text-blue-600 dark:text-blue-400 font-bold">Dashboard</a>
+                        <a href="mercado.html" class="text-gray-600 dark:text-gray-300 hover:text-blue-600">Mercado</a>
+                        <a id="link-admin" href="admin.html" class="text-red-600 dark:text-red-400 hidden">Admin</a>
+                    </div>
+                </div>
+                
+                <!-- Usuário e Ações -->
+                <div class="flex items-center space-x-4">
+                    <div class="text-right text-sm">
+                        <span id="user-team-name" class="block font-semibold text-gray-900 dark:text-white">Carregando...</span>
+                        <span id="user-cartoletas" class="block text-gray-500 dark:text-gray-400">C$ 0.00</span>
+                    </div>
+                    <button id="theme-toggle" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700" title="Alternar tema">
+                        <svg id="theme-icon-light" class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                        </svg>
+                    </button>
+                    <button onclick="logout()" class="p-2 text-red-500 hover:text-red-700" title="Sair">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="container mx-auto px-4 py-8">
+        
+        <!-- Cards de Estatísticas -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <!-- Card 1: Posição -->
+            <div class="bg-gradient-to-br from-blue-500 to-blue-700 text-white rounded-lg shadow-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm opacity-80">Sua Posição</p>
+                        <p id="user-position" class="text-4xl font-bold mt-2">-</p>
+                    </div>
+                    <div class="text-5xl opacity-30">🏆</div>
+                </div>
+            </div>
+
+            <!-- Card 2: Pontos -->
+            <div class="bg-gradient-to-br from-green-500 to-green-700 text-white rounded-lg shadow-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm opacity-80">Pontos Totais</p>
+                        <p id="user-points" class="text-4xl font-bold mt-2">0</p>
+                    </div>
+                    <div class="text-5xl opacity-30">⚡</div>
+                </div>
+            </div>
+
+            <!-- Card 3: Cartoletas -->
+            <div class="bg-gradient-to-br from-yellow-500 to-yellow-700 text-white rounded-lg shadow-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm opacity-80">Cartoletas</p>
+                        <p id="user-cartoletas-card" class="text-3xl font-bold mt-2">C$ 0.00</p>
+                    </div>
+                    <div class="text-5xl opacity-30">💰</div>
+                </div>
+            </div>
+
+            <!-- Card 4: Rodadas -->
+            <div class="bg-gradient-to-br from-purple-500 to-purple-700 text-white rounded-lg shadow-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm opacity-80">Rodadas</p>
+                        <p id="user-rounds" class="text-4xl font-bold mt-2">0</p>
+                    </div>
+                    <div class="text-5xl opacity-30">📊</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ranking Geral -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">🏆 Ranking Geral</h2>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Posição</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Time</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Pontos</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Cartoletas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-tbody" class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <!-- Será preenchido pelo JavaScript -->
+                        <tr>
+                            <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                                <div class="flex items-center justify-center">
+                                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+                                    Carregando ranking...
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Histórico de Escalações -->
+        <div id="historico-container" class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
+            <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white">📈 Seu Histórico</h2>
+            
+            <div id="historico-lista" class="space-y-3">
+                <!-- Será preenchido pelo JavaScript -->
+                <div class="flex items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+                    <span class="text-gray-500">Carregando histórico...</span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+       <!-- Scripts -->
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/auth.js"></script>
+    <script src="assets/js/dashboard.js"></script>
+</body>
+</html>
+<a href="escalacao.html" class="btn">⚽ Escalar Time</a>

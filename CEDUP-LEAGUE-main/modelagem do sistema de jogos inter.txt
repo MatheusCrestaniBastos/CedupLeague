@@ -1,0 +1,21 @@
+modelagem do sistema de jogos interclasse:
+
+Stack de desenvolvimento, linguagem, frameworks, banco e serviores
+Requisitos funcionais e não funcionais
+Sugestões para front (usar pouco JS)
+modelo de pastas e arquivos
+modelagem banco de dados ( entidades, atributos, relacionamento, classes, regras de banco)
+
+
+
+Depois de definido avaliar, se necessário corrigir/acrescentar
+pedir para simplificar (funcional)
+POR FIM CRIAR UM ARQUIVO README PARA O CLAUDE INCIAR O DEV DO SISTEMA (em tela)
+
+
+
+No Claude:
+
+1º interação - subir o arquivo e pedir para ele comprrender o sistema que vc quer desenvolver (importante pedir pra ele não criar nada momento)
+2º interação - então vamos inciar o desenvolvimento tendo o cuidado de manter os parâmetros originais que foram compartilhados anteriormente, é muito 
+importante que se vc for criar alguma pasta ou arquivo que não esteja na modelagem inicial vc me avise antes de produzir. Vamos trabalhar uma dinâmica de passa a passo começando pelas pastas e arquivos principais e posteriormente as demais. A cada passo solicite a confirmação antes de inciar a produção.
