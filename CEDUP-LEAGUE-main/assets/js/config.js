@@ -8,8 +8,8 @@
  */
 
 // Credenciais do Supabase
-const SUPABASE_URL = 'https://pfgqekfrsfwzmhlkyxem.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBmZ3Fla2Zyc2Z3em1obGt5eGVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0OTM1ODEsImV4cCI6MjA3ODA2OTU4MX0.nGsMvQeh0T7hiKfikvHu0PAkXrbD9UUqvQySfOgTKxE';
+const SUPABASE_URL = 'https://zrmbwikvtemhpzkmmwjq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpybWJ3aWt2dGVtaHB6a21td2pxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMTkyNjAsImV4cCI6MjA3ODY5NTI2MH0._ZSU-HGhj1W9HwbW7v239Kyp-QvgvGmJKEphdp1Q_sc';
 
 // Verificar se a biblioteca Supabase está carregada
 if (typeof window.supabase === 'undefined') {

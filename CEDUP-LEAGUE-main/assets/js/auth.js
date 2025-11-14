@@ -153,20 +153,44 @@ async function fazerLogin(email, senha) {
 
         console.log('✅ Autenticação bem-sucedida:', authData.user.email);
 
+        
         // Buscar dados do usuário usando RPC
-        const { data: userData, error: userError } = await supabase
-            .rpc('get_user_by_id', { user_id: authData.user.id });
+        // Dentro da função fazerLogin, após autenticação:
 
-        if (userError || !userData || userData.length === 0) {
-            console.error('❌ Erro ao buscar dados do usuário:', userError);
-            throw new Error('Erro ao carregar dados do usuário');
-        }
+// Buscar usuário
+const { data: userData, error: userError } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', authData.user.id)
+    .single();
 
-        const user = userData[0];
-        console.log('✅ Dados do usuário carregados:', user.team_name);
-        usuarioAtual = user;
-
-        mostrarMensagem('Login realizado com sucesso! Redirecionando...', 'sucesso');
+// Se não existir, criar automaticamente
+if (userError || !userData) {
+    console.log('⚠️ Criando usuário na tabela users...');
+    
+    const emailName = email.split('@')[0];
+    const teamName = emailName.charAt(0).toUpperCase() + emailName.slice(1) + ' FC';
+    
+    const { data: newUser, error: createError } = await supabase
+        .from('users')
+        .insert([{
+            id: authData.user.id,
+            email: email.trim(),
+            team_name: teamName,
+            role: 'user',
+            is_admin: false,
+            cartoletas: 40.00,
+            total_points: 0
+        }])
+        .select()
+        .single();
+    
+    if (createError) throw new Error('Erro ao criar perfil');
+    
+    usuarioAtual = newUser;
+} else {
+    usuarioAtual = userData;
+}
         
         // Redirecionar baseado na role
         setTimeout(() => {
