@@ -1,10 +1,15 @@
 // ============================================
-// CARTOLA COACH - SISTEMA DE AUTENTICAÇÃO
+// CARTOLA COACH - SISTEMA DE AUTENTICAÇÃO (ATUALIZADO)
 // ============================================
 
 /**
  * Sistema de autenticação com Supabase
  * Gerencia login, cadastro, logout e verificação de sessão
+ * 
+ * MUDANÇAS PRINCIPAIS:
+ * - Removida criação manual de usuário (agora usa trigger do banco)
+ * - Simplificado fluxo de cadastro
+ * - Melhorado tratamento de erros
  */
 
 // ============================================
@@ -153,48 +158,29 @@ async function fazerLogin(email, senha) {
 
         console.log('✅ Autenticação bem-sucedida:', authData.user.email);
 
+        // Aguardar um pouco para o trigger criar o usuário automaticamente
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Buscar dados do usuário usando RPC
-        // Dentro da função fazerLogin, após autenticação:
+        // Buscar dados do usuário (o trigger já deve ter criado)
+        const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', authData.user.id)
+            .single();
 
-// Buscar usuário
-const { data: userData, error: userError } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', authData.user.id)
-    .single();
-
-// Se não existir, criar automaticamente
-if (userError || !userData) {
-    console.log('⚠️ Criando usuário na tabela users...');
-    
-    const emailName = email.split('@')[0];
-    const teamName = emailName.charAt(0).toUpperCase() + emailName.slice(1) + ' FC';
-    
-    const { data: newUser, error: createError } = await supabase
-        .from('users')
-        .insert([{
-            id: authData.user.id,
-            email: email.trim(),
-            team_name: teamName,
-            role: 'user',
-            is_admin: false,
-            cartoletas: 40.00,
-            total_points: 0
-        }])
-        .select()
-        .single();
-    
-    if (createError) throw new Error('Erro ao criar perfil');
-    
-    usuarioAtual = newUser;
-} else {
-    usuarioAtual = userData;
-}
+        if (userError || !userData) {
+            console.error('❌ Erro ao buscar perfil:', userError);
+            throw new Error('Perfil não encontrado. Aguarde alguns segundos e tente novamente.');
+        }
+        
+        usuarioAtual = userData;
+        console.log('✅ Perfil carregado:', usuarioAtual.team_name);
+        
+        mostrarMensagem('Login realizado com sucesso!', 'sucesso');
         
         // Redirecionar baseado na role
         setTimeout(() => {
-            if (user.role === 'admin' || user.is_admin) {
+            if (usuarioAtual.role === 'admin' || usuarioAtual.is_admin) {
                 console.log('🔑 Redirecionando para painel admin...');
                 window.location.href = 'admin.html';
             } else {
@@ -260,7 +246,10 @@ async function fazerCadastro(teamName, email, senha) {
 
         console.log('✅ Usuário criado no Auth:', signUpData.user.id);
 
-        // Fazer login se sessão não foi criada automaticamente
+        // Aguardar o trigger criar o perfil
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        // Fazer login automático se sessão não foi criada
         let session = signUpData.session;
         
         if (!session) {
@@ -272,52 +261,27 @@ async function fazerCadastro(teamName, email, senha) {
             });
 
             if (signInError) {
-                throw new Error('Conta criada, mas não foi possível fazer login. Tente fazer login manualmente.');
+                throw new Error('Conta criada! Faça login para continuar.');
             }
 
             session = signInData.session;
             console.log('✅ Login automático bem-sucedido');
         }
 
-        // Aguardar um pouco para garantir que a sessão está ativa
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Criar perfil na tabela users
-        console.log('📊 Criando perfil na tabela users...');
+        // Atualizar o nome do time escolhido pelo usuário
+        console.log('📝 Atualizando nome do time...');
         
-        const { data: userData, error: userError } = await supabase
+        const { error: updateError } = await supabase
             .from('users')
-            .insert([
-                {
-                    id: signUpData.user.id,
-                    email: email.trim(),
-                    team_name: teamName.trim(),
-                    role: 'user',
-                    is_admin: false,
-                    cartoletas: 40.00,
-                    total_points: 0
-                }
-            ])
-            .select()
-            .single();
+            .update({ team_name: teamName.trim() })
+            .eq('id', signUpData.user.id);
 
-        if (userError) {
-            console.error('❌ Erro ao criar perfil:', userError);
-            
-            // Se o perfil já existe (erro de duplicata), apenas redirecionar
-            if (userError.code === '23505') {
-                console.log('⚠️ Perfil já existe, fazendo login...');
-                mostrarMensagem('Conta já existe! Redirecionando...', 'sucesso');
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1500);
-                return;
-            }
-            
-            throw new Error(`Erro ao criar perfil: ${userError.message}`);
+        if (updateError) {
+            console.error('⚠️ Erro ao atualizar nome do time:', updateError);
+            // Não é crítico, continua mesmo assim
+        } else {
+            console.log('✅ Nome do time atualizado:', teamName);
         }
-
-        console.log('✅ Perfil criado com sucesso:', userData.team_name);
 
         mostrarMensagem('Conta criada com sucesso! Redirecionando...', 'sucesso');
 
@@ -352,16 +316,19 @@ async function verificarAutenticacao() {
 
         console.log('✅ Usuário autenticado:', user.email);
 
-        // Buscar dados usando RPC
+        // Buscar dados do usuário
         const { data: userData, error: userError } = await supabase
-            .rpc('get_user_by_id', { user_id: user.id });
+            .from('users')
+            .select('*')
+            .eq('id', user.id)
+            .single();
 
-        if (userError || !userData || userData.length === 0) {
+        if (userError || !userData) {
             console.error('❌ Erro ao buscar dados:', userError);
             return null;
         }
 
-        usuarioAtual = userData[0];
+        usuarioAtual = userData;
         return usuarioAtual;
 
     } catch (error) {
@@ -497,4 +464,3 @@ window.logout = logout;
 window.verificarAutenticacao = verificarAutenticacao;
 
 console.log('✅ Sistema de autenticação inicializado');
-//

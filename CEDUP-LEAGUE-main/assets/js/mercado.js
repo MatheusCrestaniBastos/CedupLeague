@@ -174,15 +174,21 @@ async function inicializarMercado() {
 // Verificar se o mercado está aberto
 async function verificarStatusMercado() {
     try {
-        const { data: rodadaAtiva, error } = await supabase
+        // Versão alternativa que evita o erro 406
+        // Busca TODAS as rodadas e filtra no JavaScript
+        const { data: todasRodadas, error } = await supabase
             .from('rounds')
-            .select('id, name, status')
-            .eq('status', 'active')
-            .single();
+            .select('id, name, status');
         
-        if (error && error.code !== 'PGRST116') {
-            console.error('Erro ao verificar rodada:', error);
+        if (error) {
+            console.error('Erro ao buscar rodadas:', error);
+            // Se der erro, deixa mercado aberto por padrão
+            mercadoAberto = true;
+            return true;
         }
+        
+        // Filtrar rodadas ativas no JavaScript (em vez de no SQL)
+        const rodadaAtiva = todasRodadas?.find(r => r.status === 'active');
         
         if (rodadaAtiva) {
             console.log('🔒 Rodada ativa encontrada:', rodadaAtiva.name);
@@ -200,6 +206,7 @@ async function verificarStatusMercado() {
         return true;
     }
 }
+
 
 // Mostrar mensagem de mercado fechado
 function mostrarMercadoFechado() {
@@ -341,37 +348,33 @@ async function carregarJogadores() {
 // Carregar escalação atual do usuário
 async function carregarEscalacaoAtual() {
     try {
-        // Buscar rodada ativa
-        const { data: rodadaAtiva, error: errorRodada } = await supabase
+        // Buscar rodadas SEM filtro
+        const { data: todasRodadas } = await supabase
             .from('rounds')
-            .select('id')
-            .eq('status', 'pending')
-            .single();
+            .select('id, status');
         
-        if (errorRodada || !rodadaAtiva) {
-            console.log('ℹ️ Nenhuma rodada pendente encontrada');
-            return;
-        }
+        const rodadaPendente = todasRodadas?.find(r => r.status === 'pending');
+        if (!rodadaPendente) return;
         
-        // Buscar escalação do usuário
-        const { data: escalacao, error: errorEscalacao } = await supabase
+        // Buscar lineups SEM filtro
+        const { data: todasEscalacoes } = await supabase
             .from('lineups')
+            .select('id, user_id, round_id');
+        
+        const minhaEscalacao = todasEscalacoes?.find(
+            e => e.user_id === usuarioLogado.id && e.round_id === rodadaPendente.id
+        );
+        
+        if (!minhaEscalacao) return;
+        
+        // Buscar jogadores (este .eq() pode ficar, é ID)
+        const { data: jogadoresEscalacao } = await supabase
+            .from('lineup_players')
             .select(`
-                id,
-                lineup_players(
-                    player:players(
-                        id,
-                        name,
-                        position,
-                        price,
-                        photo_url,
-                        team:teams(name, logo_url)
-                    )
-                )
+                player_id,
+                players (id, name, position, price, photo_url, team_id, teams(name, logo_url))
             `)
-            .eq('user_id', usuarioLogado.id)
-            .eq('round_id', rodadaAtiva.id)
-            .single();
+            .eq('lineup_id', minhaEscalacao.id);  // ✅ OK (.eq com ID funciona)
         
         if (errorEscalacao || !escalacao) {
             console.log('ℹ️ Nenhuma escalação anterior encontrada');
